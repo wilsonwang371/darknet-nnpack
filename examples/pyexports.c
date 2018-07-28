@@ -1,6 +1,11 @@
 #include "darknet.h"
 
-extern image load_image_from_memory_thread(stbi_uc const *, int, int, int, int, pthreadpool_t);
+extern image load_image_from_memory_thread(stbi_uc const *data,
+                                           int len,
+                                           int w,
+                                           int h,
+                                           int c,
+                                           pthreadpool_t threadpool);
 
 int create_yolo_handle(void **net, const char *cfgfile, const char *weightfile, int init_nnp)
 {
