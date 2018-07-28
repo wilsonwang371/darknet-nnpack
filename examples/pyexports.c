@@ -1,4 +1,5 @@
 #include "darknet.h"
+#include "stb_image.h"
 
 extern image load_image_from_memory_thread(stbi_uc const *data,
                                            int len,
