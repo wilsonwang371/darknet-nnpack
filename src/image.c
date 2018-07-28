@@ -1527,10 +1527,10 @@ image load_image_stb_thread(char *filename, int channels, pthreadpool_t threadpo
 	return im;
 }
 
-image load_image_from_memory_stb_thread(stbi_uc const *data, int len, int channels, pthreadpool_t threadpool)
+image load_image_from_memory_stb_thread(stbi_uc const *data_in, int len, int channels, pthreadpool_t threadpool)
 {
 	int w, h, c;
-	unsigned char *data = stbi_load_from_memory(data, len, &w, &h, &c, channels);//stbi_load(filename, &w, &h, &c, channels);
+	unsigned char *data = stbi_load_from_memory(data_in, len, &w, &h, &c, channels);//stbi_load(filename, &w, &h, &c, channels);
 	if (!data) {
 		fprintf(stderr, "Cannot load image \"%s\"\nSTB Reason: %s\n", filename, stbi_failure_reason());
 		exit(0);
