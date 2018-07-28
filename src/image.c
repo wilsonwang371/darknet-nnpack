@@ -1594,7 +1594,7 @@ image load_image_thread(char *filename, int w, int h, int c, pthreadpool_t threa
 
 image load_image_from_memory_thread(stbi_uc const *data, int len, int w, int h, int c, pthreadpool_t threadpool)
 {
-    return load_image_from_memory_stb_thread(data, c, threadpool);
+    return load_image_from_memory_stb_thread(data, len, c, threadpool);
 }
 #endif
 
