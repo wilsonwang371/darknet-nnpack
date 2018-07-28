@@ -7,7 +7,7 @@ int create_yolo_handle(void **net, const char *cfgfile, const char *weightfile, 
     return -1;
 #else
     network *netp = load_network(cfgfile, weightfile, 0);
-    if (initnnp) {
+    if (init_nnp) {
         nnp_initialize();
     }
 	netp->threadpool = pthreadpool_create(4);
