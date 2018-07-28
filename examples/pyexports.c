@@ -1,10 +1,5 @@
 #include "darknet.h"
 
-#define STB_IMAGE_IMPLEMENTATION
-#include "stb_image.h"
-#define STB_IMAGE_WRITE_IMPLEMENTATION
-#include "stb_image_write.h"
-
 extern image load_image_from_memory_thread(stbi_uc const *, int, int, int, int, pthreadpool_t);
 
 int create_yolo_handle(void **net, const char *cfgfile, const char *weightfile, int init_nnp)
@@ -31,6 +26,7 @@ int detect_image(void *p, unsigned char *data, int len)
     network *net = p;
     image im = load_image_from_memory_thread(data, len, 0, 0, net->c, net->threadpool);
 	image sized = letterbox_image_thread(im, net->w, net->h, net->threadpool);
+    //TODO: fix me
     return 0;
 #endif
 }
