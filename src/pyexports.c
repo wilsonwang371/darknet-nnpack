@@ -13,7 +13,7 @@ int create_yolo_handle(void **net, const char *cfgfile, const char *weightfile, 
 #ifndef NNPACK
     return -1;
 #else
-    network *netp = load_network(cfgfile, weightfile, 0);
+    network *netp = load_network((char *)cfgfile, (char *)weightfile, 0);
     if (init_nnp) {
         nnp_initialize();
     }
@@ -33,17 +33,18 @@ int detect_image(void *p, unsigned char *data, int len,
 #else
     network *net = p;
     box *boxes;
+    layer l;
     float **probs;
     float **masks = 0;
     int i, j;
 
     image im = load_image_from_memory_thread(data, len, 0, 0, net->c, net->threadpool);
-	image sized = letterbox_image_thread(im, net->w, net->h, net->threadpool);
+    image sized = letterbox_image_thread(im, net->w, net->h, net->threadpool);
 
-    if (boxes_in == NULL || prob_in == NULL)
+    if (boxes_in == NULL || probs_in == NULL)
         return -1;
 
-    layer l = net->layers[net->n-1];
+    l = net->layers[net->n-1];
     /* if boxes and probs are not allocated, we allocate them here */
     if (*boxes_in == NULL) {
         boxes = calloc(l.w*l.h*l.n, sizeof(box));
@@ -62,7 +63,7 @@ int detect_image(void *p, unsigned char *data, int len,
         *probs_in = probs;
         for(j = 0; j < l.w*l.h*l.n; ++j){
             probs[j] = calloc(l.classes + 1, sizeof(float *));
-            if (!probs[i]) {
+            if (!probs[j]) {
                 goto errfreeprobs;
             }
         }
@@ -112,7 +113,6 @@ errfreeprobs:
 errfreeboxes:
     free(*boxes_in);
     *boxes_in = NULL;
-err:
     return -1;
 #endif
 }
