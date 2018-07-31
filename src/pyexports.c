@@ -36,7 +36,6 @@ int detect_image(void *p, unsigned char *data, int len,
     layer l;
     float **probs;
     float **masks = 0;
-    static char **names = NULL;
     int i, j;
 
     image im = load_image_from_memory_thread(data, len, 0, 0, net->c, net->threadpool);
