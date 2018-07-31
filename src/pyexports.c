@@ -94,6 +94,8 @@ int detect_image(void *p, unsigned char *data, int len,
             goto errfreemasks;
         }
         *names_in = names;
+    } else {
+        names = *names_in;
     }
 
     float *X = sized.data;
