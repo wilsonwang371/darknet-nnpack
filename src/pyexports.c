@@ -24,16 +24,96 @@ int create_yolo_handle(void **net, const char *cfgfile, const char *weightfile, 
 
 }
 
-int detect_image(void *p, unsigned char *data, int len)
+int detect_image(void *p, unsigned char *data, int len,
+                 void **boxes_in, float ***probs_in, float ***masks_in,
+                 float thresh, float hier_thresh)
 {
 #ifndef NNPACK
     return -1;
 #else
     network *net = p;
+    box *boxes;
+    float **probs;
+    float **masks = 0;
+    int i, j;
+
     image im = load_image_from_memory_thread(data, len, 0, 0, net->c, net->threadpool);
 	image sized = letterbox_image_thread(im, net->w, net->h, net->threadpool);
-    //TODO: fix me
+
+    if (boxes_in == NULL || prob_in == NULL)
+        return -1;
+
+    layer l = net->layers[net->n-1];
+    /* if boxes and probs are not allocated, we allocate them here */
+    if (*boxes_in == NULL) {
+        boxes = calloc(l.w*l.h*l.n, sizeof(box));
+        if (boxes == NULL){
+            return -1;
+        }
+        *boxes_in = (void *)boxes;
+    } else {
+        boxes = *boxes_in;
+    }
+    if (*probs_in == NULL) {
+        probs = calloc(l.w*l.h*l.n, sizeof(float *));
+        if (!probs) {
+            goto errfreeboxes;
+        }
+        *probs_in = probs;
+        for(j = 0; j < l.w*l.h*l.n; ++j){
+            probs[j] = calloc(l.classes + 1, sizeof(float *));
+            if (!probs[i]) {
+                goto errfreeprobs;
+            }
+        }
+    } else {
+        probs = *probs_in;
+    }
+    if (l.coords > 4){
+        if (*masks_in == NULL) {
+            masks = calloc(l.w*l.h*l.n, sizeof(float*));
+            if (!masks) {
+                goto errfreeprobs;
+            }
+            *masks_in = masks;
+            for(j = 0; j < l.w*l.h*l.n; ++j){
+                masks[j] = calloc(l.coords-4, sizeof(float *));
+                if (!masks[j]) {
+                    goto errfreemasks;
+                }
+            }
+        } else {
+            masks = *masks_in;
+        }
+        
+    }
+
+    float *X = sized.data;
+    network_predict(net, X);
+    get_region_boxes(l, im.w, im.h, net->w, net->h,
+                     thresh, probs, boxes, masks, 0, 0, hier_thresh, 1);
     return 0;
+errfreemasks:
+    for(i = 0; i < l.w*l.h*l.n; ++i){
+        if (probs[i]){
+            free(masks_in[i]);
+        }
+    }
+    free(*masks_in);
+    *masks_in = NULL;
+errfreeprobs:
+    for(i = 0; i < l.w*l.h*l.n; ++i){
+        if (probs_in[i]){
+            free(probs_in[i]);
+        }
+    }
+    free(*probs_in);
+    *probs_in = NULL;
+errfreeboxes:
+    free(*boxes_in);
+    *boxes_in = NULL;
+err:
+    return -1;
 #endif
 }
 
