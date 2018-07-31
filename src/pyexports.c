@@ -38,6 +38,7 @@ int detect_image(void *p, unsigned char *data, int len,
     float **masks = 0;
     char **names = NULL;
     int i, j;
+    int status = 0;
 
     image im = load_image_from_memory_thread(data, len, 0, 0, net->c, net->threadpool);
     image sized = letterbox_image_thread(im, net->w, net->h, net->threadpool);
@@ -47,24 +48,28 @@ int detect_image(void *p, unsigned char *data, int len,
 
     l = net->layers[net->n-1];
     /* if boxes and probs are not allocated, we allocate them here */
-    if (*boxes_in == NULL) {
+    if (boxes_in == NULL || *boxes_in == NULL) {
         boxes = calloc(l.w*l.h*l.n, sizeof(box));
         if (boxes == NULL){
             return -1;
         }
-        *boxes_in = (void *)boxes;
+        if (boxes_in)
+            *boxes_in = (void *)boxes;
     } else {
         boxes = *boxes_in;
     }
-    if (*probs_in == NULL) {
+    if (probs_in == NULL || *probs_in == NULL) {
         probs = calloc(l.w*l.h*l.n, sizeof(float *));
         if (!probs) {
+            status = -1;
             goto errfreeboxes;
         }
-        *probs_in = probs;
+        if (probs_in)
+            *probs_in = probs;
         for(j = 0; j < l.w*l.h*l.n; ++j){
             probs[j] = calloc(l.classes + 1, sizeof(float *));
             if (!probs[j]) {
+                status = -1;
                 goto errfreeprobs;
             }
         }
@@ -72,15 +77,18 @@ int detect_image(void *p, unsigned char *data, int len,
         probs = *probs_in;
     }
     if (l.coords > 4){
-        if (*masks_in == NULL) {
+        if (masks_in == NULL || *masks_in == NULL) {
             masks = calloc(l.w*l.h*l.n, sizeof(float*));
             if (!masks) {
+                status = -1;
                 goto errfreeprobs;
             }
-            *masks_in = masks;
+            if (masks_in)
+                *masks_in = masks;
             for(j = 0; j < l.w*l.h*l.n; ++j){
                 masks[j] = calloc(l.coords-4, sizeof(float *));
                 if (!masks[j]) {
+                    status = -1;
                     goto errfreemasks;
                 }
             }
@@ -91,6 +99,7 @@ int detect_image(void *p, unsigned char *data, int len,
     if (*names_in == NULL) {
         names = get_labels(name_list);
         if (names != NULL) {
+            status = -1;
             goto errfreemasks;
         }
         *names_in = names;
@@ -103,7 +112,7 @@ int detect_image(void *p, unsigned char *data, int len,
     get_region_boxes(l, im.w, im.h, net->w, net->h,
                      thresh, probs, boxes, masks, 0, 0, hier_thresh, 1);
 
-    for(i = 0; i < l.w*l.h*l.n; ++i){
+    for (i = 0; i < l.w*l.h*l.n; ++i) {
         char labelstr[4096] = {0};
         int class = -1;
         for(j = 0; j < l.classes; ++j){
@@ -119,7 +128,9 @@ int detect_image(void *p, unsigned char *data, int len,
             }
         }
     }
-    return 0;
+    free_image(im);
+    free_image(sized);
+
 errfreemasks:
     if (l.coords > 4){
         for(i = 0; i < l.w*l.h*l.n; ++i){
@@ -141,7 +152,7 @@ errfreeprobs:
 errfreeboxes:
     free(*boxes_in);
     *boxes_in = NULL;
-    return -1;
+    return status;
 #endif
 }
 
