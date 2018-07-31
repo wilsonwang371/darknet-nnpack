@@ -98,7 +98,7 @@ int detect_image(void *p, unsigned char *data, int len,
     }
     if (*names_in == NULL) {
         names = get_labels(name_list);
-        if (names != NULL) {
+        if (names == NULL) {
             status = -1;
             goto errfreemasks;
         }
