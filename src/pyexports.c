@@ -36,7 +36,7 @@ int detect_image(void *p, unsigned char *data, int len,
     layer l;
     float **probs;
     float **masks = 0;
-    char **names;
+    char **names = NULL;
     int i, j;
 
     image im = load_image_from_memory_thread(data, len, 0, 0, net->c, net->threadpool);
@@ -91,11 +91,9 @@ int detect_image(void *p, unsigned char *data, int len,
     if (*names_in == NULL) {
         names = get_labels(name_list);
         if (names != NULL) {
-            *names_in = names;
+            goto errfreemasks;
         }
-    }
-    if (names == NULL) {
-        goto errfreemasks;
+        *names_in = names;
     }
 
     float *X = sized.data;
