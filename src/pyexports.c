@@ -102,7 +102,8 @@ int detect_image(void *p, unsigned char *data, int len,
             status = -1;
             goto errfreemasks;
         }
-        *names_in = names;
+        if (names_in)
+            *names_in = names;
     } else {
         names = *names_in;
     }
