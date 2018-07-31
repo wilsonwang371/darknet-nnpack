@@ -26,7 +26,7 @@ int create_yolo_handle(void **net, const char *cfgfile, const char *weightfile, 
 
 int detect_image(void *p, unsigned char *data, int len,
                  void **boxes_in, float ***probs_in, float ***masks_in,
-                 float thresh, float hier_thresh)
+                 float thresh, float hier_thresh, char ***names, char *name_list)
 {
 #ifndef NNPACK
     return -1;
@@ -36,6 +36,7 @@ int detect_image(void *p, unsigned char *data, int len,
     layer l;
     float **probs;
     float **masks = 0;
+    static char **names = NULL;
     int i, j;
 
     image im = load_image_from_memory_thread(data, len, 0, 0, net->c, net->threadpool);
@@ -86,13 +87,32 @@ int detect_image(void *p, unsigned char *data, int len,
         } else {
             masks = *masks_in;
         }
-        
+    }
+    if (*names == NULL) {
+        *names = get_labels(name_list);
     }
 
     float *X = sized.data;
     network_predict(net, X);
     get_region_boxes(l, im.w, im.h, net->w, net->h,
                      thresh, probs, boxes, masks, 0, 0, hier_thresh, 1);
+
+    for(i = 0; i < l.w*l.h*l.n; ++i){
+        char labelstr[4096] = {0};
+        int class = -1;
+        for(j = 0; j < l.classes; ++j){
+            if (probs[i][j] > thresh){
+                if (class < 0) {
+                    strcat(labelstr, names[j]);
+                    class = j;
+                } else {
+                    strcat(labelstr, ", ");
+                    strcat(labelstr, names[j]);
+                }
+                printf("%s: %.0f%%\n", names[j], probs[i][j]*100);
+            }
+        }
+    }
     return 0;
 errfreemasks:
     for(i = 0; i < l.w*l.h*l.n; ++i){
