@@ -134,7 +134,7 @@ int detect_image(void *p, unsigned char *data, int len,
 errfreemasks:
     if (l.coords > 4){
         for(i = 0; i < l.w*l.h*l.n; ++i){
-            if (probs[i]){
+            if (masks_in[i]){
                 free(masks_in[i]);
             }
         }
