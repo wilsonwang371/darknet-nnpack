@@ -8,7 +8,7 @@ extern image load_image_from_memory_thread(stbi_uc const *data,
                                            int c,
                                            pthreadpool_t threadpool);
 
-int create_yolo_handle(void **net, const char *cfgfile, const char *weightfile, int init_nnp)
+int create_yolo_handle(void **net, const char *cfgfile, const char *weightfile, int init_nnp, int num_threads)
 {
 #ifndef NNPACK
     return -1;
@@ -17,7 +17,7 @@ int create_yolo_handle(void **net, const char *cfgfile, const char *weightfile, 
     if (init_nnp) {
         nnp_initialize();
     }
-	netp->threadpool = pthreadpool_create(4);
+	netp->threadpool = pthreadpool_create(num_threads);
     *net = (void *)netp;
     return 0;
 #endif
