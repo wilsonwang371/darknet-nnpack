@@ -26,7 +26,7 @@ int create_yolo_handle(void **net, const char *cfgfile, const char *weightfile, 
 
 int detect_image(void *p, unsigned char *data, int len,
                  void **boxes_in, float ***probs_in, float ***masks_in,
-                 float thresh, float hier_thresh, char ***names, char *name_list)
+                 float thresh, float hier_thresh, char ***names_in, char *name_list)
 {
 #ifndef NNPACK
     return -1;
@@ -36,6 +36,7 @@ int detect_image(void *p, unsigned char *data, int len,
     layer l;
     float **probs;
     float **masks = 0;
+    char **names;
     int i, j;
 
     image im = load_image_from_memory_thread(data, len, 0, 0, net->c, net->threadpool);
@@ -87,8 +88,14 @@ int detect_image(void *p, unsigned char *data, int len,
             masks = *masks_in;
         }
     }
-    if (*names == NULL) {
-        *names = get_labels(name_list);
+    if (*names_in == NULL) {
+        names = get_labels(name_list);
+        if (names != NULL) {
+            *names_in = names;
+        }
+    }
+    if (names == NULL) {
+        goto errfreemasks;
     }
 
     float *X = sized.data;
@@ -114,13 +121,15 @@ int detect_image(void *p, unsigned char *data, int len,
     }
     return 0;
 errfreemasks:
-    for(i = 0; i < l.w*l.h*l.n; ++i){
-        if (probs[i]){
-            free(masks_in[i]);
+    if (l.coords > 4){
+        for(i = 0; i < l.w*l.h*l.n; ++i){
+            if (probs[i]){
+                free(masks_in[i]);
+            }
         }
+        free(*masks_in);
+        *masks_in = NULL;
     }
-    free(*masks_in);
-    *masks_in = NULL;
 errfreeprobs:
     for(i = 0; i < l.w*l.h*l.n; ++i){
         if (probs_in[i]){
