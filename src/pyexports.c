@@ -144,15 +144,17 @@ errfreemasks:
     }
 errfreeprobs:
     for(i = 0; i < l.w*l.h*l.n; ++i){
-        if (probs_in[i]){
-            free(probs_in[i]);
+        if (probs[i]){
+            free(probs[i]);
         }
     }
-    free(*probs_in);
-    *probs_in = NULL;
+    free(probs);
+    if (probs_in)
+        *probs_in = NULL;
 errfreeboxes:
-    free(*boxes_in);
-    *boxes_in = NULL;
+    free(boxes);
+    if (boxes_in)
+        *boxes_in = NULL;
     return status;
 #endif
 }
