@@ -48,11 +48,6 @@ int detect_image(void *p, unsigned char *data, int len, char **names,
     image im = load_image_from_memory_thread(data, len, 0, 0, net->c, net->threadpool);
     image sized = letterbox_image_thread(im, net->w, net->h, net->threadpool);
 
-    if (boxes_in == NULL || probs_in == NULL){
-        status = -1;
-        goto err;
-    }
-
     l = net->layers[net->n-1];
     /* if boxes and probs are not allocated, we allocate them here */
     boxes = calloc(l.w*l.h*l.n, sizeof(box));
