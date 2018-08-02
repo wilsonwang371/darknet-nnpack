@@ -133,7 +133,6 @@ int free_yolo_network_handle(void *p, int deinit_nnp)
 #ifndef NNPACK
     return -1;
 #else
-    network *net = p;
     if (deinit_nnp) {
         nnp_deinitialize();
     }
