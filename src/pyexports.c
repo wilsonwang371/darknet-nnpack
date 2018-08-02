@@ -104,7 +104,6 @@ int detect_image(void *p, unsigned char *data, int len, char **names,
         }
     }
     draw_detections(im, l.w*l.h*l.n, thresh, boxes, probs, masks, names, NULL, l.classes);
-    save_image(im, "prediction");
     free_image(im);
     free_image(sized);
 
