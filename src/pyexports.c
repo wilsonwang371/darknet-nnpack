@@ -39,8 +39,8 @@ int detect_image(void *p, unsigned char *data, int len, char **names,
     network *net = p;
     box *boxes;
     layer l;
-    float **probs;
-    float **masks = 0;
+    float **probs = NULL;
+    float **masks = NULL;
     int i, j;
     int status = 0;
 
@@ -103,6 +103,8 @@ int detect_image(void *p, unsigned char *data, int len, char **names,
             }
         }
     }
+    draw_detections(im, l.w*l.h*l.n, thresh, boxes, probs, masks, names, alphabet, l.classes);
+    save_image(im, "prediction");
     free_image(im);
     free_image(sized);
 
