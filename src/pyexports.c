@@ -61,7 +61,7 @@ int detect_image(void *p, unsigned char *data, int len, char **names,
         goto errfreeboxes;
     }
     for(j = 0; j < l.w*l.h*l.n; ++j){
-        probs[j] = calloc(l.classes + 1, sizeof(float *));
+        probs[j] = calloc(l.classes + 1, sizeof(float));
         if (!probs[j]) {
             status = -1;
             goto errfreeprobs;
@@ -74,7 +74,7 @@ int detect_image(void *p, unsigned char *data, int len, char **names,
             goto errfreeprobs;
         }
         for(j = 0; j < l.w*l.h*l.n; ++j){
-            masks[j] = calloc(l.coords-4, sizeof(float *));
+            masks[j] = calloc(l.coords-4, sizeof(float));
             if (!masks[j]) {
                 status = -1;
                 goto errfreemasks;
