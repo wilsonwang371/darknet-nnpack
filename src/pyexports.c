@@ -22,8 +22,7 @@ int create_yolo_handle(void **net, char ***names, const char *name_list,
     *net = (void *)netp;
     *names = get_labels((char *)name_list);
     if (*names == NULL) {
-        status = -1;
-        goto errfreemasks;
+        return -1;
     }
     return 0;
 #endif
