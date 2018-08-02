@@ -110,10 +110,10 @@ errfreemasks:
     if (l.coords > 4){
         for(i = 0; i < l.w*l.h*l.n; ++i){
             if (masks[i]){
-                free(masks_in[i]);
+                free(masks[i]);
             }
         }
-        free(masks_in);
+        free(masks);
     }
 errfreeprobs:
     for(i = 0; i < l.w*l.h*l.n; ++i){
