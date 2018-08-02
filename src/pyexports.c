@@ -8,7 +8,8 @@ extern image load_image_from_memory_thread(stbi_uc const *data,
                                            int c,
                                            pthreadpool_t threadpool);
 
-int create_yolo_handle(void **net, const char *cfgfile, const char *weightfile, const char ***names,
+int create_yolo_handle(void **net, char ***names, const char *name_list,
+                       const char *cfgfile, const char *weightfile,
                        int init_nnp, int num_threads)
 {
 #ifndef NNPACK
