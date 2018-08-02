@@ -255,7 +255,7 @@ void draw_detections(image im, int num, float thresh, box *boxes, float **probs,
             }
         }
         if(class >= 0){
-            int width = im.h * .006;
+            int width = im.h * .01;
 
             /*
                if(0){
