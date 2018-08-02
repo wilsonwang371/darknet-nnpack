@@ -10,7 +10,7 @@ extern image load_image_from_memory_thread(stbi_uc const *data,
 
 int create_yolo_handle(void **net, char ***names, const char *name_list,
                        const char *cfgfile, const char *weightfile,
-                       int init_nnp, int num_threads)
+                       int init_nnp)
 {
 #ifndef NNPACK
     return -1;
@@ -30,6 +30,7 @@ int create_yolo_handle(void **net, char ***names, const char *name_list,
 }
 
 int detect_image(void *p, unsigned char *data, int len, char **names,
+                 int num_threads,
                  float thresh, float hier_thresh)
 {
 #ifndef NNPACK
